@@ -1,7 +1,7 @@
 /* 
 The purpose of the following SQL queries is to validate the values and ensure the accuracy of the formulas used in the data visualization
 produced in Tableau. 
-
+Data Visualization: https://public.tableau.com/views/HRAttritionDashboardProject_16865853535310/Viz?:language=en-US&:display_count=n&:origin=viz_share_link
 
 Project Name: Analysis of Attrition Data in the Human Resources Department
 Skills used: CTE, CASE, Crosstab 
