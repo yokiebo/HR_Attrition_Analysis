@@ -241,21 +241,132 @@ CREATE EXTENSION IF NOT EXISTS tablefunc;
 
 
 
--- Recent Attrition
+		
+--Recent attrition table
 
 SELECT 
-	DATE(attrition_date) AS attrition_date,
-	employee_number AS emp_no,
+	CONCAT('E_', employee_number),
 	job_role,
 	department,
-	ROUND(CAST((environment_satisfaction + job_satisfaction + job_involvement + relationship_satisfaction + work_life_balance) AS numeric) / 5, 1)  AS Avg_satisfaction_score,
+	attrition_date::date,
+	ROUND((environment_satisfaction + job_satisfaction + job_involvement + relationship_satisfaction + work_life_balance)::numeric / 5 , 1) AS avg_sat_rating,
 	performance_rating,
-	monthly_income:: money,
-	CONCAT(percent_salary_hike, '%') AS salary_hike
+	monthly_income,
+	percent_salary_hike
 FROM hr_attrition
-WHERE attrition_date IS NOT NULL
-ORDER BY attrition_date DESC, employee_number
+WHERE attrition = 'Yes'
+ORDER BY attrition_date::date DESC
 
+
+
+-- CHECKING IF THE ACTION FILTERS ARE WORKING AS INTENDED
+
+-- Total Attrition
+SELECT 
+	SUM(employee_count)
+FROM hr_attrition
+WHERE gender = 'Male' AND age BETWEEN 25 AND 34 AND education = 'Bachelor''s Degree' AND department = 'Sales' AND job_role = 'Sales Executive' AND monthly_income BETWEEN 5000 AND 10000
+AND attrition = 'Yes'
+
+
+-- Total Retention
+
+SELECT 
+	SUM(employee_count)
+FROM hr_attrition
+WHERE gender = 'Male' AND age BETWEEN 25 AND 34 AND education = 'Bachelor''s Degree' AND department = 'Sales' AND job_role = 'Sales Executive' AND monthly_income BETWEEN 5000 AND 10000
+AND attrition = 'No'
+
+
+-- Attrition rate
+SELECT 
+	ROUND(((SELECT SUM(employee_count)::numeric FROM hr_attrition WHERE gender = 'Male' AND age BETWEEN 25 AND 34 AND education = 'Bachelor''s Degree' AND department = 'Sales' AND job_role = 'Sales Executive' AND monthly_income BETWEEN 5000 AND 10000
+AND attrition = 'Yes')
+	/
+	SUM(employee_count)::numeric)*100, 1)
+FROM hr_attrition
+WHERE gender = 'Male' AND age BETWEEN 25 AND 34 AND education = 'Bachelor''s Degree' AND department = 'Sales' AND job_role = 'Sales Executive' AND monthly_income BETWEEN 5000 AND 10000
+
+
+-- Average age
+SELECT 
+	ROUND(AVG(age)::numeric, 0)
+FROM hr_attrition 
+WHERE gender = 'Male' AND age BETWEEN 25 AND 34 AND education = 'Bachelor''s Degree' AND department = 'Sales' AND job_role = 'Sales Executive' AND monthly_income BETWEEN 5000 AND 10000
+
+
+-- SURVEY SCORES
+
+-- Environment Satisfaction
+SELECT
+	attrition_label,
+	SUM(CASE WHEN environment_satisfaction = 1 THEN 1 ELSE 0 END) AS one,
+	SUM(CASE WHEN environment_satisfaction = 2 THEN 1 ELSE 0 END) AS two,
+	SUM(CASE WHEN environment_satisfaction = 3 THEN 1 ELSE 0 END) AS three,
+	SUM(CASE WHEN environment_satisfaction = 4 THEN 1 ELSE 0 END) AS four
+FROM hr_attrition
+WHERE gender = 'Male' AND age BETWEEN 25 AND 34 AND education = 'Bachelor''s Degree' AND department = 'Sales' AND job_role = 'Sales Executive' AND monthly_income BETWEEN 5000 AND 10000
+GROUP BY attrition_label
+
+					
+-- Job Satisfaction
+SELECT 
+	attrition_label,
+	SUM(CASE WHEN job_satisfaction = 1 THEN 1 ELSE 0 END) AS one,
+	SUM(CASE WHEN job_satisfaction = 2 THEN 1 ELSE 0 END) AS two,
+	SUM(CASE WHEN job_satisfaction = 3 THEN 1 ELSE 0 END) AS three,
+	SUM(CASE WHEN job_satisfaction = 4 THEN 1 ELSE 0 END) AS four
+FROM hr_attrition
+WHERE gender = 'Male' AND age BETWEEN 25 AND 34 AND education = 'Bachelor''s Degree' AND department = 'Sales' AND job_role = 'Sales Executive' AND monthly_income BETWEEN 5000 AND 10000
+GROUP BY attrition_label
+
+-- Job Involvement
+SELECT
+	attrition_label,
+	SUM(CASE WHEN job_involvement = 1 THEN 1 ELSE 0 END) AS one,
+	SUM(CASE WHEN job_involvement = 2 THEN 1 ELSE 0 END) AS two,
+	SUM(CASE WHEN job_involvement = 3 THEN 1 ELSE 0 END) AS three,
+	SUM(CASE WHEN job_involvement = 4 THEN 1 ELSE 0 END) AS four
+FROM hr_attrition
+WHERE gender = 'Male' AND age BETWEEN 25 AND 34 AND education = 'Bachelor''s Degree' AND department = 'Sales' AND job_role = 'Sales Executive' AND monthly_income BETWEEN 5000 AND 10000
+GROUP BY attrition_label
+
+-- Relationship Satisfaction
+SELECT
+	attrition_label,
+	SUM(CASE WHEN relationship_satisfaction = 1 THEN 1 ELSE 0 END) AS one,
+	SUM(CASE WHEN relationship_satisfaction = 2 THEN 1 ELSE 0 END) AS two,
+	SUM(CASE WHEN relationship_satisfaction = 3 THEN 1 ELSE 0 END) AS three,
+	SUM(CASE WHEN relationship_satisfaction = 4 THEN 1 ELSE 0 END) AS four
+FROM hr_attrition
+WHERE gender = 'Male' AND age BETWEEN 25 AND 34 AND education = 'Bachelor''s Degree' AND department = 'Sales' AND job_role = 'Sales Executive' AND monthly_income BETWEEN 5000 AND 10000
+GROUP BY attrition_label
+
+-- Work Life Balance
+SELECT
+	attrition_label,
+	SUM(CASE WHEN work_life_balance = 1 THEN 1 ELSE 0 END) AS one,
+	SUM(CASE WHEN work_life_balance = 2 THEN 1 ELSE 0 END) AS two,
+	SUM(CASE WHEN work_life_balance = 3 THEN 1 ELSE 0 END) AS three,
+	SUM(CASE WHEN work_life_balance = 4 THEN 1 ELSE 0 END) AS four
+FROM hr_attrition
+WHERE gender = 'Male' AND age BETWEEN 25 AND 34 AND education = 'Bachelor''s Degree' AND department = 'Sales' AND job_role = 'Sales Executive' AND monthly_income BETWEEN 5000 AND 10000
+GROUP BY attrition_label
+
+
+-- Recent Attrition
+SELECT 
+	CONCAT('E_', employee_number),
+	job_role,
+	department,
+	attrition_date::date,
+	ROUND((environment_satisfaction + job_satisfaction + job_involvement + relationship_satisfaction + work_life_balance)::numeric / 5 , 1) AS avg_sat_rating,
+	performance_rating,
+	monthly_income,
+	percent_salary_hike
+FROM hr_attrition
+WHERE gender = 'Male' AND age BETWEEN 25 AND 34 AND education = 'Bachelor''s Degree' AND department = 'Sales' AND job_role = 'Sales Executive' AND monthly_income BETWEEN 5000 AND 10000 AND attrition = 'Yes'
+ORDER BY attrition_date::date DESC
 
 
 
