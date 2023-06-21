@@ -133,6 +133,16 @@ FROM hr_attrition
 GROUP BY department
 ORDER BY attrition_count DESC
 
+-- Attrition/retention by Monthly Income
+		
+SELECT 
+	attrition_label,
+	SUM(CASE WHEN monthly_income BETWEEN 0 AND 5000 THEN 1 ELSE 0 END) AS low,
+	SUM(CASE WHEN monthly_income BETWEEN 5001 AND 10000 THEN 1 ELSE 0 END) AS average,
+	SUM(CASE WHEN monthly_income BETWEEN 10001 AND 15000 THEN 1 ELSE 0 END) AS high,
+	SUM(CASE WHEN monthly_income > 15000 THEN 1 ELSE 0 END) AS very_high
+FROM hr_attrition
+GROUP BY attrition_label
 
 
 
